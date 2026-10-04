@@ -113,21 +113,40 @@
   }
   @keyframes bob{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
 
-  /* ---- tappable envelope (intro) ---- */
-  .envelope{ position:relative; width:240px; height:160px; margin:24px auto 6px; cursor:pointer; perspective:900px; }
-  .envelope .env-base{ position:absolute; inset:0; z-index:1; border-radius:12px; background:#b95036; box-shadow:0 16px 34px rgba(168,61,43,.35); }
-  .env-letter{ position:absolute; left:16px; right:16px; top:16px; height:122px; background:#fff;
-    border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,.18); display:flex; align-items:center; justify-content:center;
-    font-size:42px; z-index:2; transition:transform .6s cubic-bezier(.2,.9,.3,1.25) .3s; }
-  .env-front{ position:absolute; inset:0; z-index:3; border-radius:12px;
-    background:linear-gradient(135deg,#de9b62,#bb5539); clip-path:polygon(0 30%,50% 62%,100% 30%,100% 100%,0 100%); }
-  .env-flap{ position:absolute; left:0; top:0; width:0; height:0; z-index:5; transform-origin:top center;
-    border-left:120px solid transparent; border-right:120px solid transparent; border-top:92px solid #b95036;
-    transition:transform .5s ease, z-index 0s .25s; }
-  .envelope:not(.open){ animation:bob 2.6s ease-in-out infinite; }
+  /* Matched paper panels and a hinged flap share the same silhouette. */
+  .envelope{ position:relative; width:240px; height:160px; margin:110px auto 14px;
+    cursor:pointer; perspective:1000px; isolation:isolate; }
+  .env-base{ position:absolute; inset:0; z-index:1; border-radius:12px;
+    background:linear-gradient(160deg,#af5137,#803d2c);
+    box-shadow:0 18px 32px -12px rgba(107,56,28,.38),inset 0 0 0 1px #9b4d32; }
+  .env-letter{ position:absolute; left:18px; right:18px; top:10px; height:136px;
+    background:linear-gradient(#fffdf5,#fff5df); border:1px solid #ead7af; border-radius:8px;
+    box-shadow:0 4px 12px rgba(83,43,24,.15); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:4px; font-size:34px; z-index:2;
+    transition:transform .85s cubic-bezier(.22,.8,.25,1) .48s; }
+  .env-letter small{ font-family:'Baloo 2',sans-serif; font-size:17px; color:#855236; }
+  .env-front{ position:absolute; inset:0; z-index:3; width:100%; height:100%; }
+  .env-flap{ position:absolute; inset:0; z-index:4; transform-origin:50% 0;
+    transform-style:preserve-3d; transition:transform .7s cubic-bezier(.4,0,.2,1),z-index 0s .35s; }
+  .env-flap svg{ display:block; width:100%; height:100%; }
+  .env-seal{ position:absolute; z-index:5; top:73px; left:100px; width:40px; height:40px;
+    display:grid; place-items:center; font-size:23px; border-radius:50%;
+    background:linear-gradient(145deg,#f6d18b,#dfad61); border:2px solid #ffe3aa;
+    box-shadow:0 3px 7px rgba(101,54,28,.24); transition:opacity .2s,transform .3s; }
+  .envelope:focus-visible{ outline:3px solid var(--green-deep); outline-offset:12px; border-radius:12px; }
+  .envelope:not(.open){ animation:envelopeSway 4s ease-in-out infinite; }
+  @keyframes envelopeSway{ 0%,100%{ transform:translateY(0) rotate(-1deg); }
+    50%{ transform:translateY(-5px) rotate(1deg); } }
+  .envelope.open .env-seal{ opacity:0; transform:scale(.6); }
   .envelope.open .env-flap{ transform:rotateX(180deg); z-index:1; }
-  .envelope.open .env-letter{ transform:translateY(-94px) scale(1.06); z-index:6; }
-  .env-cap{ margin-top:16px; font-weight:600; }
+  .envelope.open .env-letter{ transform:translateY(-98px); }
+  .env-cap{ margin-top:20px; font-weight:600; }
+  .flyer{ opacity:.55; }
+  .confetti{ z-index:0 !important; opacity:.7; }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{ animation:none !important; transition:none !important; }
+    #sky,.confetti{ display:none; }
+  }
 
   h1{ font-family:'Baloo 2',sans-serif; font-weight:800; font-size:clamp(28px,7.4vw,46px); margin:0 0 8px; line-height:1.06;
       background:linear-gradient(90deg,var(--pink-deep),var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; }
@@ -221,11 +240,23 @@
   <div class="card">
     <h1>Hiii Elizabeth</h1>
     <p class="sub">A little autumn adventure, just us two 🍂</p>
-    <div class="envelope" id="envelope" role="button" aria-label="Open the envelope">
+    <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Open your invitation">
       <div class="env-base"></div>
-      <div class="env-letter">🍎</div>
-      <div class="env-front"></div>
-      <div class="env-flap"></div>
+      <div class="env-letter" aria-hidden="true"><span>🍎</span><small>A little adventure</small></div>
+      <svg class="env-front" viewBox="0 0 240 160" aria-hidden="true">
+        <defs><linearGradient id="paper" x2="0.3" y2="1"><stop stop-color="#e3ad73"/><stop offset="1" stop-color="#ca8653"/></linearGradient></defs>
+        <path d="M0 0 L120 90 L240 0 V148 Q240 160 228 160 H12 Q0 160 0 148Z" fill="url(#paper)"/>
+        <path d="M3 155 L102 78 Q120 66 138 78 L237 155" fill="#de9f66" stroke="#bc7848" stroke-width="1.2"/>
+        <path d="M12 160 Q0 160 0 148 M228 160 Q240 160 240 148" fill="none" stroke="#c18451"/>
+      </svg>
+      <div class="env-flap" aria-hidden="true">
+        <svg viewBox="0 0 240 160">
+          <defs><linearGradient id="flapPaper" x2="0" y2="1"><stop stop-color="#edbb85"/><stop offset="1" stop-color="#d49760"/></linearGradient></defs>
+          <path d="M0 12 Q0 0 12 0 H228 Q240 0 240 12 L130 91 Q120 99 110 91Z" fill="url(#flapPaper)" stroke="#c48a55" stroke-width="1"/>
+          <path d="M12 2 H228" stroke="#f9d6a5" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="env-seal" aria-hidden="true">🍎</div>
     </div>
     <p class="sub env-cap" id="envCap">open the envelope 👆</p>
   </div>
@@ -315,7 +346,7 @@ function el(cls){ const d=document.createElement("div"); d.className="flyer "+cl
 // drifting hearts (steady population)
 (function(){
   const set=["🍎","🍏","🍂","🍁","✨"];
-  for(let i=0;i<12;i++){
+  for(let i=0;i<8;i++){
     const s=el("heart"); s.textContent=set[(Math.random()*set.length)|0];
     s.style.left=Math.random()*100+"vw"; s.style.fontSize=(16+Math.random()*26)+"px";
     const dur=10+Math.random()*12; s.style.animationDuration=dur+"s"; s.style.animationDelay=(-Math.random()*dur)+"s";
@@ -344,19 +375,21 @@ function spawnStar(){
   sky.appendChild(s); setTimeout(()=>s.remove(),dur*1000+200);
 }
 // stagger the spawners so the sky always has something happening
-setInterval(spawnPlane, 2600);
-setInterval(spawnArrow, 3400);
-setInterval(spawnStar, 2200);
-setTimeout(spawnPlane,400); setTimeout(spawnArrow,900); setTimeout(spawnStar,1500);
+setInterval(spawnPlane, 6500);
+// Orchard leaves replace the fast arrow effect.
+// Keep the background calm: no repeated shooting stars.
+setTimeout(spawnPlane,1200);
 
 /* ---------------- helpers ---------------- */
 function vibrate(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
 function go(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); document.getElementById(id).classList.add("active"); }
 function confetti(n){
   const set=["🍎","🍏","🍂","🍁","✨","🍩"];   // confetti, cakes & party — no hearts
-  for(let i=0;i<(n||40);i++){
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  document.querySelectorAll(".confetti").forEach(c=>c.remove());
+  for(let i=0;i<Math.min(n||18,18);i++){
     const c=document.createElement("div"); c.className="confetti"; c.textContent=set[(Math.random()*set.length)|0];
-    c.style.left=Math.random()*100+"vw"; c.style.fontSize=(16+Math.random()*22)+"px";
+    c.style.left=Math.random()*100+"vw"; c.style.fontSize=(12+Math.random()*12)+"px";
     const dur=2+Math.random()*2.5; c.style.animation=`fall ${dur}s linear forwards`; c.style.animationDelay=(Math.random()*.6)+"s";
     document.body.appendChild(c); setTimeout(()=>c.remove(),(dur+1)*1000);
   }
@@ -373,8 +406,12 @@ envelope.addEventListener("click",()=>{
   vibrate([15,30,15]);
   envelope.classList.add("open");
   const cap=document.getElementById("envCap"); if(cap) cap.textContent="✨";
-  setTimeout(()=>confetti(40), 320);
-  setTimeout(()=>go("screen1"), 1250);   // let the flap open & letter rise, then move on
+  setTimeout(()=>confetti(12), 650);
+  setTimeout(()=>go("screen1"), 1800);   // let the flap open & letter rise, then move on
+});
+
+envelope.addEventListener("keydown",event=>{
+  if(event.key==="Enter" || event.key===" "){ event.preventDefault(); envelope.click(); }
 });
 
 /* ---------------- SCREEN 1: runaway + text-changing No ---------------- */
