@@ -306,7 +306,7 @@
       <textarea id="experience" rows="2" maxlength="500" aria-describedby="experienceHint" placeholder="Tell me your qualifications…"></textarea>
     </div>
     <div class="question-field">
-      <label for="funFact">Fun fact / special request 💬</label>
+      <label for="funFact">Fun fact / special request / additional comment 💬</label>
       <p id="funFactHint">Something I should know about you, or a little request for our date?</p>
       <textarea id="funFact" rows="2" maxlength="500" aria-describedby="funFactHint" placeholder="I’m listening…"></textarea>
     </div>
@@ -546,7 +546,7 @@ yesBtn.addEventListener("click", ()=>{
 const questions=[
   {id:"carDJ",label:"Car DJ requests 🎶"},
   {id:"experience",label:"Applicable experience 🍏"},
-  {id:"funFact",label:"Fun fact / special request 💬"},
+  {id:"funFact",label:"Fun fact / special request / additional comment 💬"},
 ];
 document.getElementById("next2").addEventListener("click",()=>{
   document.activeElement?.blur(); vibrate(25); confetti(12); go("screen3");
