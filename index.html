@@ -256,16 +256,16 @@
   </div>
 </section>
 
-<!-- ===================== SCREEN 3: DATE & TIME ===================== -->
+<!-- ===================== SCREEN 3: PICKUP ===================== -->
 <section class="screen" id="screen3">
   <div class="card">
-    <div class="badge">🗓️</div>
-    <h1>When are you free?</h1>
-    <p class="sub">pick a day & time that works for you</p>
-    <div class="chips" id="dayChips"></div>
-    <div class="field"><label>Date</label><input type="date" id="dateInput" /></div>
-    <div class="field"><label>Time</label><input type="time" id="timeInput" /></div>
-    <button class="btn next" id="next3" disabled>Lock it in 🔒</button>
+    <div class="badge">🚗</div>
+    <h1>I’ll pick you up!</h1>
+    <p class="sub">Your ride to our autumn adventure is sorted 🍂</p>
+    <div class="summary-line">🗓️ <b>Thursday</b></div>
+    <div class="summary-line">⏰ <b>12:30 PM</b></div>
+    <p class="mini">Just bring yourself. I’ll bring the apple-picking energy 🍎</p>
+    <button class="btn next" id="next3">See our plan 🍎</button>
   </div>
 </section>
 
@@ -497,29 +497,16 @@ CONFIG.activities.forEach(a=>{
 });
 document.getElementById("next2").addEventListener("click",()=>{ vibrate(25); confetti(24); go("screen3"); });
 
-/* ---------------- SCREEN 3: date & time ---------------- */
-const dateInput=document.getElementById("dateInput"), timeInput=document.getElementById("timeInput"), next3=document.getElementById("next3");
-dateInput.min=new Date().toISOString().split("T")[0];
-function nextWeekday(t){ const d=new Date(); for(let i=1;i<=7;i++){ const n=new Date(d); n.setDate(d.getDate()+i); if(n.getDay()===t) return n; } return d; }
-const chipWrap=document.getElementById("dayChips");
-[["This Friday",nextWeekday(5)],["This Saturday",nextWeekday(6)],["This Sunday",nextWeekday(0)]].forEach(([label,dt])=>{
-  const c=document.createElement("div"); c.className="chip"; c.textContent=label;
-  c.addEventListener("click",()=>{ vibrate(15); dateInput.value=dt.toISOString().split("T")[0]; checkDT(); });
-  chipWrap.appendChild(c);
-});
-function checkDT(){ next3.disabled = !(dateInput.value && timeInput.value); }
-dateInput.addEventListener("input",checkDT); timeInput.addEventListener("input",checkDT);
-next3.addEventListener("click",()=>{ vibrate([20,40,20,40,160]); confetti(90); buildSummary(); go("screen4"); });
+/* ---------------- SCREEN 3: pickup ---------------- */
+document.getElementById("next3").addEventListener("click",()=>{ vibrate([20,40,20,40,160]); confetti(90); buildSummary(); go("screen4"); });
 
 /* ---------------- SCREEN 4: summary ---------------- */
-function prettyDate(v){ try{ return new Date(v+"T00:00:00").toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}); }catch(e){ return v; } }
-function prettyTime(v){ try{ const [h,m]=v.split(":"); const d=new Date(); d.setHours(+h,+m); return d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}); }catch(e){ return v; } }
 let summaryText="";
 function buildSummary(){
-  const acts=["Apple picking", ...chosen].join(" + "), date=prettyDate(dateInput.value), time=prettyTime(timeInput.value);
+  const acts=["Apple picking", ...chosen].join(" + "), date="Thursday", time="12:30 PM";
   document.getElementById("summaryBox").innerHTML=
-    `<div class="summary-line">🍎 <b>${acts}</b></div><div class="summary-line">🗓️ <b>${date}</b></div><div class="summary-line">⏰ <b>${time}</b></div>`;
-  summaryText=`It’s an apple-picking date! 💘\nWhat: ${acts}\nWhen: ${date} at ${time}`;
+    `<div class="summary-line">🍎 <b>${acts}</b></div><div class="summary-line">🗓️ <b>${date}</b></div><div class="summary-line">🚗 Pickup: <b>${time}</b></div>`;
+  summaryText=`It’s an apple-picking date! 💘\nWhat: ${acts}\nPickup: ${date} at ${time}`;
   // pre-fill an SMS to your number with the plan; she just taps send
   document.getElementById("textBtn").setAttribute("href", `sms:${CONFIG.textTo}?&body=${encodeURIComponent(summaryText)}`);
 }
