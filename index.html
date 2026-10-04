@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Apple picking with Elizabeth 🍎</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --pink:#d88449;
+    --pink-deep:#a83d2b;
+    --purple:#996227;
+    --green:#628448;
+    --green-deep:#476534;
+    --ink:#463321;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; height:100%; overflow:hidden; }
+  body{
+    font-family:'Fredoka',system-ui,sans-serif;
+    color:var(--ink);
+    /* soft, airy light background like the mockup */
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #ffe7bb 0%, transparent 60%),
+      radial-gradient(1000px 600px at 0% 110%, #ead9b9 0%, transparent 55%),
+      linear-gradient(160deg,#fff9ed 0%, #fff3dc 45%, #edf0dc 100%);
+    height:100dvh;
+    position:relative;
+    user-select:none; -webkit-user-select:none;
+  }
+
+  /* ============ animated background layers ============ */
+  #sky{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+  .flyer{ position:absolute; will-change:transform; }
+
+  /* floating hearts drifting up */
+  .heart{ bottom:-60px; opacity:.5; animation:floatUp linear infinite; }
+  @keyframes floatUp{
+    0%{ transform:translateY(0) rotate(0); opacity:0; }
+    12%{ opacity:.55; } 88%{ opacity:.55; }
+    100%{ transform:translateY(-118dvh) rotate(360deg); opacity:0; }
+  }
+
+  /* paper planes / love letters gliding across */
+  @keyframes glide{
+    0%{ transform:translateX(-18vw) translateY(0) rotate(8deg); opacity:0; }
+    8%{ opacity:.85; }
+    50%{ transform:translateX(50vw) translateY(-26px) rotate(-6deg); }
+    92%{ opacity:.85; }
+    100%{ transform:translateX(120vw) translateY(10px) rotate(10deg); opacity:0; }
+  }
+
+  /* cupid's arrow shooting across with a little heart tip */
+  .arrow{ display:flex; align-items:center; gap:2px; filter:drop-shadow(0 4px 6px rgba(168,61,43,.25)); }
+  .arrow .tip{ font-size:1em; }
+  .arrow .shaft{ width:46px; height:3px; border-radius:3px;
+    background:linear-gradient(90deg, rgba(255,109,169,0) 0%, var(--pink) 60%, var(--pink-deep) 100%); }
+  .arrow .feather{ font-size:.7em; margin-left:-4px; opacity:.9; }
+  @keyframes dart{
+    0%{ transform:translateX(-22vw) rotate(-4deg); opacity:0; }
+    10%{ opacity:1; } 90%{ opacity:1; }
+    100%{ transform:translateX(122vw) rotate(-4deg); opacity:0; }
+  }
+
+  /* shooting stars: bright head + gradient tail, diagonal (gold/pink so it shows on light bg) */
+  .star{ width:6px; height:6px; border-radius:50%;
+    background:#ffd86b; box-shadow:0 0 10px 3px rgba(255,191,90,.85); }
+  .star::after{ content:""; position:absolute; right:4px; top:2px;
+    width:90px; height:2px; transform-origin:right center;
+    background:linear-gradient(90deg, rgba(255,216,107,0), #ffcaa8 40%, #ff9ec7 100%); border-radius:2px; }
+  @keyframes shoot{
+    0%{ transform:translate(0,0); opacity:0; }
+    12%{ opacity:1; }
+    100%{ transform:translate(-78vw,78vh); opacity:0; }
+  }
+
+  /* ============ screens ============ */
+  .screen{
+    position:fixed; inset:0; z-index:1;
+    display:none; flex-direction:column; align-items:center;
+    text-align:center; padding:84px 22px 44px;
+    overflow-y:auto; -webkit-overflow-scrolling:touch;   /* scroll when a page is taller than the phone */
+  }
+  .screen.active{ display:flex; animation:popIn .5s cubic-bezier(.2,.9,.3,1.4); }
+  /* auto-margin spacers center the card when it fits, but let it scroll (top never clipped) when it doesn't */
+  .screen::before{ content:""; margin-top:auto; }
+  .screen::after{ content:""; margin-bottom:auto; }
+  @keyframes popIn{ from{opacity:0; transform:scale(.92) translateY(12px);} to{opacity:1; transform:none;} }
+
+  .card{
+    background:rgba(255,255,255,.92);
+    backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,.9);
+    border-radius:34px;
+    box-shadow:0 24px 60px rgba(113,77,35,.20);
+    padding:40px 28px 34px;
+    max-width:540px; width:100%;
+    position:relative;
+  }
+
+  /* heart badge at the top of the card (like the mockup) */
+  .badge{
+    width:88px; height:88px; border-radius:50%;
+    margin:-78px auto 14px;
+    background:linear-gradient(135deg,var(--pink),var(--pink-deep));
+    display:flex; align-items:center; justify-content:center;
+    font-size:42px; color:#fff;
+    box-shadow:0 14px 30px rgba(168,61,43,.45);
+    animation:bob 2.6s ease-in-out infinite;
+  }
+  @keyframes bob{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+  /* ---- tappable envelope (intro) ---- */
+  .envelope{ position:relative; width:240px; height:160px; margin:24px auto 6px; cursor:pointer; perspective:900px; }
+  .envelope .env-base{ position:absolute; inset:0; z-index:1; border-radius:12px; background:#b95036; box-shadow:0 16px 34px rgba(168,61,43,.35); }
+  .env-letter{ position:absolute; left:16px; right:16px; top:16px; height:122px; background:#fff;
+    border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,.18); display:flex; align-items:center; justify-content:center;
+    font-size:42px; z-index:2; transition:transform .6s cubic-bezier(.2,.9,.3,1.25) .3s; }
+  .env-front{ position:absolute; inset:0; z-index:3; border-radius:12px;
+    background:linear-gradient(135deg,#de9b62,#bb5539); clip-path:polygon(0 30%,50% 62%,100% 30%,100% 100%,0 100%); }
+  .env-flap{ position:absolute; left:0; top:0; width:0; height:0; z-index:5; transform-origin:top center;
+    border-left:120px solid transparent; border-right:120px solid transparent; border-top:92px solid #b95036;
+    transition:transform .5s ease, z-index 0s .25s; }
+  .envelope:not(.open){ animation:bob 2.6s ease-in-out infinite; }
+  .envelope.open .env-flap{ transform:rotateX(180deg); z-index:1; }
+  .envelope.open .env-letter{ transform:translateY(-94px) scale(1.06); z-index:6; }
+  .env-cap{ margin-top:16px; font-weight:600; }
+
+  h1{ font-family:'Baloo 2',sans-serif; font-weight:800; font-size:clamp(28px,7.4vw,46px); margin:0 0 8px; line-height:1.06;
+      background:linear-gradient(90deg,var(--pink-deep),var(--purple)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .sub{ font-size:clamp(15px,4vw,19px); color:#7e6b53; margin:0 0 24px; }
+
+  .btn-row{ display:flex; gap:16px; justify-content:center; align-items:center; flex-wrap:wrap; margin-top:6px; }
+  .btn{
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:20px;
+    border:none; border-radius:999px; padding:16px 32px; cursor:pointer;
+    transition:transform .12s ease, box-shadow .2s ease, filter .2s ease;
+  }
+  .btn-green{ background:linear-gradient(135deg,var(--green),var(--green-deep)); color:#fff; box-shadow:0 12px 26px rgba(33,184,99,.45); }
+  .btn-pink{ background:linear-gradient(135deg,var(--pink),var(--pink-deep)); color:#fff; box-shadow:0 12px 26px rgba(168,61,43,.45); }
+  .btn:active{ transform:scale(.96); }
+  .btn-green:hover,.btn-pink:hover{ filter:brightness(1.05); }
+
+  /* size lives in --ys so the wobble keeps the current scale instead of resetting it */
+  #yesBtn{ transform-origin:center; position:relative; z-index:6; transform:scale(var(--ys,1)); }
+  @keyframes wob{
+    0%,100%{ transform:scale(var(--ys,1)) rotate(0); }
+    20%{ transform:scale(var(--ys,1)) rotate(-7deg); }
+    40%{ transform:scale(var(--ys,1)) rotate(6deg); }
+    60%{ transform:scale(var(--ys,1)) rotate(-4deg); }
+    80%{ transform:scale(var(--ys,1)) rotate(3deg); }
+  }
+  #yesBtn.wob{ animation:wob .5s ease; }
+
+  #noBtn{
+    background:#f6e7d3; color:#856249; border:2px solid #e9cfaa;
+    box-shadow:0 6px 14px rgba(0,0,0,.06);
+    position:relative; z-index:7; touch-action:none; min-width:96px;  /* ABOVE Yes so it stays clickable until the takeover */
+  }
+
+  /* selectable option cards */
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(116px,1fr)); gap:14px; margin:22px 0; }
+  .opt{
+    background:#fff; border:3px solid #eee0c9; border-radius:22px; padding:18px 10px; cursor:pointer;
+    transition:transform .12s ease, border-color .2s, box-shadow .2s, background .2s;
+    display:flex; flex-direction:column; gap:6px; align-items:center;
+  }
+  .opt .em{ font-size:38px; } .opt .lb{ font-weight:600; font-size:15px; }
+  .opt:hover{ transform:translateY(-3px); }
+  .opt.sel{ border-color:var(--pink-deep); background:linear-gradient(135deg,#fff,#fff0d5);
+            box-shadow:0 10px 24px rgba(168,61,43,.3); transform:translateY(-3px) scale(1.02); }
+
+  .field{ text-align:left; margin:16px 0; max-width:260px; }
+  .field label{ display:block; font-weight:600; margin-bottom:6px; font-size:15px; color:#7e6b53; }
+  .field input{ width:100%; min-width:0; box-sizing:border-box; font-family:'Fredoka'; font-size:18px; padding:14px 16px;
+    border:3px solid #eee0c9; border-radius:16px; background:#fff; color:var(--ink); outline:none; }
+  .field input:focus{ border-color:var(--pink); }
+
+  .next{ margin-top:18px; background:linear-gradient(135deg,var(--purple),var(--pink-deep)); color:#fff; box-shadow:0 12px 26px rgba(153,98,39,.4); }
+  .next:disabled{ opacity:.45; cursor:not-allowed; filter:grayscale(.3); }
+  a.btn{ text-decoration:none; display:inline-block; }
+  #copyBtn{ margin-top:10px; background:#fff; color:var(--pink-deep); border:2px solid #e9cfaa; box-shadow:none; font-size:16px; padding:12px 22px; }
+
+  .chips{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:4px; }
+  .chip{ background:#fff; border:2px solid #eee0c9; border-radius:999px; padding:8px 14px; font-size:14px; font-weight:600; cursor:pointer; }
+  .chip:active{ transform:scale(.96); }
+
+  .summary-line{ font-size:20px; margin:10px 0; } .summary-line b{ color:var(--pink-deep); }
+
+  .popup{
+    position:fixed; z-index:50; pointer-events:none;
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px;
+    background:#fff; color:var(--pink-deep);
+    padding:10px 16px; border-radius:16px; border:3px solid var(--pink);
+    box-shadow:0 12px 30px rgba(168,61,43,.35);
+    transform:translate(-50%,-50%) scale(0);
+    animation:popMsg 1.5s cubic-bezier(.2,.9,.3,1.4) forwards; white-space:nowrap;
+  }
+  @keyframes popMsg{
+    0%{ transform:translate(-50%,-50%) scale(0) rotate(-8deg); opacity:0; }
+    18%{ transform:translate(-50%,-50%) scale(1.12) rotate(4deg); opacity:1; }
+    32%{ transform:translate(-50%,-50%) scale(1) rotate(0); } 80%{ opacity:1; }
+    100%{ transform:translate(-50%,-92%) scale(.9); opacity:0; }
+  }
+
+  .confetti{ position:fixed; top:-30px; z-index:60; pointer-events:none; font-size:22px; will-change:transform; }
+  @keyframes fall{ to{ transform:translateY(112dvh) rotate(720deg); opacity:.9; } }
+
+  .mini{ font-size:13px; color:#a99; margin-top:16px; }
+</style>
+</head>
+<body>
+
+<div id="sky"></div>
+
+<!-- ===================== SCREEN 0: INTRO ===================== -->
+<section class="screen active" id="screen0">
+  <div class="card">
+    <h1>Hiii Elizabeth</h1>
+    <p class="sub">A little autumn adventure, just us two 🍂</p>
+    <div class="envelope" id="envelope" role="button" aria-label="Open the envelope">
+      <div class="env-base"></div>
+      <div class="env-letter">🍎</div>
+      <div class="env-front"></div>
+      <div class="env-flap"></div>
+    </div>
+    <p class="sub env-cap" id="envCap">open the envelope 👆</p>
+  </div>
+</section>
+
+<!-- ===================== SCREEN 1: THE QUESTION ===================== -->
+<section class="screen" id="screen1">
+  <div class="card">
+    <div class="badge">🍎</div>
+    <h1 id="q1">Want to go apple picking with me?</h1>
+    <p class="sub">Apples, crisp fall air, and cider donuts on me 🍩</p>
+    <div class="btn-row" id="btnRow">
+      <button class="btn btn-green" id="yesBtn">Let’s go 🍎</button>
+      <button class="btn" id="noBtn">No</button>
+    </div>
+    <p class="mini">(the No button is feeling a little shy today)</p>
+  </div>
+</section>
+
+<!-- ===================== SCREEN 2: PICK ACTIVITY ===================== -->
+<section class="screen" id="screen2">
+  <div class="card">
+    <div class="badge">🎉</div>
+    <h1>An orchard date it is!</h1>
+    <p class="sub">Apple picking is the plan. What should we add? (pick a few)</p>
+    <div class="grid" id="optGrid"></div>
+    <button class="btn next" id="next2" disabled>Next 💫</button>
+  </div>
+</section>
+
+<!-- ===================== SCREEN 3: DATE & TIME ===================== -->
+<section class="screen" id="screen3">
+  <div class="card">
+    <div class="badge">🗓️</div>
+    <h1>When are you free?</h1>
+    <p class="sub">pick a day & time that works for you</p>
+    <div class="chips" id="dayChips"></div>
+    <div class="field"><label>Date</label><input type="date" id="dateInput" /></div>
+    <div class="field"><label>Time</label><input type="time" id="timeInput" /></div>
+    <button class="btn next" id="next3" disabled>Lock it in 🔒</button>
+  </div>
+</section>
+
+<!-- ===================== SCREEN 4: IT'S A DATE ===================== -->
+<section class="screen" id="screen4">
+  <div class="card">
+    <div class="badge">💘</div>
+    <h1>It’s an apple-picking date!</h1>
+    <p class="sub">You, me, and a basket full of apples. Can’t wait 🍂</p>
+    <div id="summaryBox" style="margin:18px 0;"></div>
+    <a class="btn next" id="textBtn" href="#">Text me the details 💌</a>
+    <button class="btn" id="copyBtn">or just copy them 📋</button>
+    <p class="mini" id="copyNote"></p>
+  </div>
+</section>
+
+<script>
+/* ============================================================
+   EDIT ME — names & options
+   ============================================================ */
+const CONFIG = {
+  herName: "Elizabeth",   // → "Will you go apple picking with me, Elizabeth?"
+  yourName: "Jordan",   // → "Text Jordan the details"
+  textTo: "+14014868323",   // "Text me the details" opens her Messages app to this number, pre-filled with the plan
+
+  // Activity / food choices on screen 2. {emoji, label}
+  activities: [
+    { em:"🍩", lb:"Cider donuts" }, { em:"☕", lb:"Warm cider" },
+    { em:"🚜", lb:"Hayride" }, { em:"📸", lb:"Cute photos" },
+    { em:"🎃", lb:"Pumpkin patch" }, { em:"🍽️", lb:"Food after" },
+    { em:"🍎", lb:"Just the apples" },
+  ],
+
+  // The No button's TEXT changes to the next line each time she tries to click it.
+  // (It starts as "No"; first dodge → first line below, and so on. It loops.)
+  noLabels: [
+    "Are u sure?", "Take some time", "i see you’re still thinking",
+    "really sure?", "Think again!", "still a no? 🥺", "the Yes button is lonely →",
+    "c’mon… 💘", "you know you wanna 😏", "last chance to say yes!",
+  ],
+};
+
+/* ---------------- animated background ---------------- */
+const sky = document.getElementById("sky");
+function el(cls){ const d=document.createElement("div"); d.className="flyer "+cls; return d; }
+
+// drifting hearts (steady population)
+(function(){
+  const set=["🍎","🍏","🍂","🍁","✨"];
+  for(let i=0;i<12;i++){
+    const s=el("heart"); s.textContent=set[(Math.random()*set.length)|0];
+    s.style.left=Math.random()*100+"vw"; s.style.fontSize=(16+Math.random()*26)+"px";
+    const dur=10+Math.random()*12; s.style.animationDuration=dur+"s"; s.style.animationDelay=(-Math.random()*dur)+"s";
+    sky.appendChild(s);
+  }
+})();
+
+function spawnPlane(){
+  const s=el(""); const kind=Math.random();
+  s.textContent = kind<0.6 ? "🍂" : (kind<0.85 ? "🍁" : "🍎");
+  s.style.top=(8+Math.random()*70)+"vh"; s.style.fontSize=(22+Math.random()*16)+"px";
+  const dur=7+Math.random()*6; s.style.animation=`glide ${dur}s linear forwards`;
+  sky.appendChild(s); setTimeout(()=>s.remove(),dur*1000+200);
+}
+function spawnArrow(){
+  const s=el("arrow");
+  s.innerHTML=`<span class="tip">🍎</span><span class="shaft"></span><span class="feather">✨</span>`;
+  s.style.top=(10+Math.random()*72)+"vh"; s.style.fontSize=(18+Math.random()*12)+"px";
+  const dur=4.5+Math.random()*3; s.style.animation=`dart ${dur}s linear forwards`;
+  sky.appendChild(s); setTimeout(()=>s.remove(),dur*1000+200);
+}
+function spawnStar(){
+  const s=el("star");
+  s.style.left=(55+Math.random()*45)+"vw"; s.style.top=(-5+Math.random()*30)+"vh";
+  const dur=1.3+Math.random()*1.2; s.style.animation=`shoot ${dur}s ease-in forwards`;
+  sky.appendChild(s); setTimeout(()=>s.remove(),dur*1000+200);
+}
+// stagger the spawners so the sky always has something happening
+setInterval(spawnPlane, 2600);
+setInterval(spawnArrow, 3400);
+setInterval(spawnStar, 2200);
+setTimeout(spawnPlane,400); setTimeout(spawnArrow,900); setTimeout(spawnStar,1500);
+
+/* ---------------- helpers ---------------- */
+function vibrate(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+function go(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); document.getElementById(id).classList.add("active"); }
+function confetti(n){
+  const set=["🍎","🍏","🍂","🍁","✨","🍩"];   // confetti, cakes & party — no hearts
+  for(let i=0;i<(n||40);i++){
+    const c=document.createElement("div"); c.className="confetti"; c.textContent=set[(Math.random()*set.length)|0];
+    c.style.left=Math.random()*100+"vw"; c.style.fontSize=(16+Math.random()*22)+"px";
+    const dur=2+Math.random()*2.5; c.style.animation=`fall ${dur}s linear forwards`; c.style.animationDelay=(Math.random()*.6)+"s";
+    document.body.appendChild(c); setTimeout(()=>c.remove(),(dur+1)*1000);
+  }
+}
+
+/* ---------------- personalize ---------------- */
+document.getElementById("textBtn").textContent = `Text ${CONFIG.yourName||"me"} the details 💌`;
+
+/* ---------------- SCREEN 0 → 1 ---------------- */
+const envelope=document.getElementById("envelope");
+let envOpened=false;
+envelope.addEventListener("click",()=>{
+  if(envOpened) return; envOpened=true;
+  vibrate([15,30,15]);
+  envelope.classList.add("open");
+  const cap=document.getElementById("envCap"); if(cap) cap.textContent="✨";
+  setTimeout(()=>confetti(40), 320);
+  setTimeout(()=>go("screen1"), 1250);   // let the flap open & letter rise, then move on
+});
+
+/* ---------------- SCREEN 1: runaway + text-changing No ---------------- */
+const yesBtn=document.getElementById("yesBtn");
+const noBtn=document.getElementById("noBtn");
+let yesScale=1, noTries=0, noLoose=false, tookOver=false, yesArmed=true;
+const NO_LIMIT=10;   // she can dodge the No button this many times before Yes takes over
+
+// after the limit: Yes rises above everything and balloons to fill the screen, covering No for good
+function takeoverYes(){
+  tookOver=true;
+  yesArmed=false;   // don't let the tap that triggered the takeover count — wait for a fresh click
+  // retire the No button — Yes already covers everything
+  noBtn.style.transition="opacity .2s"; noBtn.style.opacity="0"; noBtn.style.pointerEvents="none";
+  setTimeout(()=>{ noBtn.style.display="none"; }, 220);
+
+  // KEEP the size it grew to — never shrink. Just make sure it fully covers the
+  // screen and lift it above everything, then wait for her deliberate tap.
+  yesBtn.classList.remove("wob");
+  yesBtn.style.zIndex="9999";
+  const w=yesBtn.offsetWidth||110, h=yesBtn.offsetHeight||56;
+  const cover=Math.max(window.innerWidth/w, window.innerHeight/h)*1.08;  // guarantee full edge-to-edge cover
+  yesScale=Math.max(yesScale, cover);  // only ever grow
+  yesBtn.style.transition="transform .4s ease-out";
+  requestAnimationFrame(()=>{ yesBtn.style.setProperty("--ys", yesScale); });
+  // arm it shortly after, so the next deliberate tap is what proceeds
+  setTimeout(()=>{ yesArmed=true; }, 600);
+}
+
+function showPointer(x,y){
+  const p=document.createElement("div"); p.className="popup"; p.textContent="↑ Yes is right here 👀";
+  const px=Math.min(Math.max(x,100), window.innerWidth-100);
+  const py=Math.min(Math.max(y,60), window.innerHeight-60);
+  p.style.left=px+"px"; p.style.top=py+"px";
+  document.body.appendChild(p); setTimeout(()=>p.remove(),1600);
+}
+function growYes(){
+  // grow a big chunk each dodge, but never past the screen size — otherwise the
+  // final "fill the screen" step would have to SHRINK it back down
+  const w=yesBtn.offsetWidth||110, h=yesBtn.offsetHeight||56;
+  // grow until it covers the screen in BOTH directions (the wider side overflows and is
+  // clipped by the body, so it fills top-to-bottom as well as side-to-side)
+  const fit=Math.max(window.innerWidth/w, window.innerHeight/h);
+  yesScale=Math.min(yesScale*1.28, fit);
+  yesBtn.style.setProperty("--ys", yesScale);
+  yesBtn.classList.remove("wob"); void yesBtn.offsetWidth; yesBtn.classList.add("wob");
+}
+// the actually-visible area (accounts for the mobile address bar via visualViewport)
+function vpBounds(){
+  const vv=window.visualViewport;
+  return { w: vv?vv.width:window.innerWidth, h: vv?vv.height:window.innerHeight, x: vv?vv.offsetLeft:0, y: vv?vv.offsetTop:0 };
+}
+// the rectangle the No button may roam: full visible width, but only the upper ~60%
+// of the height so it never drops behind the bottom toolbar / out of reach
+function noBounds(){
+  const b=vpBounds(), w=noBtn.offsetWidth, h=noBtn.offsetHeight;
+  const padX=Math.max(6, b.w*0.02), topPad=Math.max(10, b.h*0.06);
+  const minX=b.x+padX, maxX=Math.max(minX, b.x+b.w-w-padX);
+  const minY=b.y+topPad, maxY=Math.max(minY, b.y + b.h*0.74 - h);
+  return {minX,maxX,minY,maxY};
+}
+function clampNoIntoView(){
+  if(!noLoose) return;
+  const r=noBounds();
+  const left=parseFloat(noBtn.style.left)||0, top=parseFloat(noBtn.style.top)||0;
+  noBtn.style.left=Math.min(Math.max(left,r.minX),r.maxX)+"px";
+  noBtn.style.top =Math.min(Math.max(top, r.minY),r.maxY)+"px";
+}
+window.addEventListener("resize", clampNoIntoView);
+if(window.visualViewport){ window.visualViewport.addEventListener("resize", clampNoIntoView); window.visualViewport.addEventListener("scroll", clampNoIntoView); }
+let lastFlee=0;
+function fleeNo(clientX, clientY){
+  // one tap fires pointerenter + pointerdown + click together — collapse them into a single dodge
+  const now=Date.now();
+  if(now - lastFlee < 250) return;
+  lastFlee=now;
+  noTries++;
+  vibrate([35,30,35]);
+  // first 10 dodges play normally; the 11th attempt triggers the Yes takeover
+  if(noTries > NO_LIMIT){ takeoverYes(); return; }
+  growYes();
+  // change the No button's text each time
+  noBtn.textContent = CONFIG.noLabels[(noTries-1) % CONFIG.noLabels.length];
+  // every few dodges, nudge her toward Yes
+  if(noTries % 3 === 0) showPointer(clientX || window.innerWidth/2, (clientY?clientY-70:window.innerHeight/2));
+
+  if(!noLoose){
+    const r=noBtn.getBoundingClientRect();
+    noBtn.style.position="fixed"; noBtn.style.left=r.left+"px"; noBtn.style.top=r.top+"px"; noBtn.style.margin="0";
+    noLoose=true;
+  }
+  noBtn.style.transform=`rotate(${(Math.random()*12-6)|0}deg)`;
+  // teleport, but only within the safe upper band so it's always visible & reachable
+  const r=noBounds();
+  noBtn.style.left=(r.minX + Math.random()*(r.maxX-r.minX))+"px";
+  noBtn.style.top =(r.minY + Math.random()*(r.maxY-r.minY))+"px";
+}
+noBtn.addEventListener("pointerenter", e=>fleeNo(e.clientX,e.clientY));
+noBtn.addEventListener("pointerdown", e=>{ e.preventDefault(); e.stopPropagation(); fleeNo(e.clientX,e.clientY); });
+noBtn.addEventListener("click", e=>{ e.preventDefault(); e.stopPropagation(); fleeNo(e.clientX,e.clientY); });
+
+yesBtn.addEventListener("click", ()=>{
+  // ignore a click that "leaked" onto Yes because No just darted away from under the finger
+  if(!tookOver && Date.now()-lastFlee < 400) return;
+  // after the full-screen takeover, wait for a fresh deliberate tap (not the one that triggered it)
+  if(tookOver && !yesArmed) return;
+  vibrate([20,40,20,40,120]);
+  confetti(170); setTimeout(()=>confetti(130),250); setTimeout(()=>confetti(90),500);
+  setTimeout(()=>go("screen2"),650);
+});
+
+/* ---------------- SCREEN 2: activities ---------------- */
+const grid=document.getElementById("optGrid"); const chosen=new Set();
+CONFIG.activities.forEach(a=>{
+  const d=document.createElement("div"); d.className="opt"; d.innerHTML=`<span class="em">${a.em}</span><span class="lb">${a.lb}</span>`;
+  d.addEventListener("click",()=>{ vibrate(15); d.classList.toggle("sel");
+    d.classList.contains("sel")?chosen.add(a.lb):chosen.delete(a.lb);
+    document.getElementById("next2").disabled = chosen.size===0; });
+  grid.appendChild(d);
+});
+document.getElementById("next2").addEventListener("click",()=>{ vibrate(25); confetti(24); go("screen3"); });
+
+/* ---------------- SCREEN 3: date & time ---------------- */
+const dateInput=document.getElementById("dateInput"), timeInput=document.getElementById("timeInput"), next3=document.getElementById("next3");
+dateInput.min=new Date().toISOString().split("T")[0];
+function nextWeekday(t){ const d=new Date(); for(let i=1;i<=7;i++){ const n=new Date(d); n.setDate(d.getDate()+i); if(n.getDay()===t) return n; } return d; }
+const chipWrap=document.getElementById("dayChips");
+[["This Friday",nextWeekday(5)],["This Saturday",nextWeekday(6)],["This Sunday",nextWeekday(0)]].forEach(([label,dt])=>{
+  const c=document.createElement("div"); c.className="chip"; c.textContent=label;
+  c.addEventListener("click",()=>{ vibrate(15); dateInput.value=dt.toISOString().split("T")[0]; checkDT(); });
+  chipWrap.appendChild(c);
+});
+function checkDT(){ next3.disabled = !(dateInput.value && timeInput.value); }
+dateInput.addEventListener("input",checkDT); timeInput.addEventListener("input",checkDT);
+next3.addEventListener("click",()=>{ vibrate([20,40,20,40,160]); confetti(90); buildSummary(); go("screen4"); });
+
+/* ---------------- SCREEN 4: summary ---------------- */
+function prettyDate(v){ try{ return new Date(v+"T00:00:00").toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}); }catch(e){ return v; } }
+function prettyTime(v){ try{ const [h,m]=v.split(":"); const d=new Date(); d.setHours(+h,+m); return d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}); }catch(e){ return v; } }
+let summaryText="";
+function buildSummary(){
+  const acts=["Apple picking", ...chosen].join(" + "), date=prettyDate(dateInput.value), time=prettyTime(timeInput.value);
+  document.getElementById("summaryBox").innerHTML=
+    `<div class="summary-line">🍎 <b>${acts}</b></div><div class="summary-line">🗓️ <b>${date}</b></div><div class="summary-line">⏰ <b>${time}</b></div>`;
+  summaryText=`It’s an apple-picking date! 💘\nWhat: ${acts}\nWhen: ${date} at ${time}`;
+  // pre-fill an SMS to your number with the plan; she just taps send
+  document.getElementById("textBtn").setAttribute("href", `sms:${CONFIG.textTo}?&body=${encodeURIComponent(summaryText)}`);
+}
+document.getElementById("textBtn").addEventListener("click",()=>{ vibrate([20,40,20]); confetti(40); });
+document.getElementById("copyBtn").addEventListener("click",async ()=>{
+  vibrate(30);
+  try{ await navigator.clipboard.writeText(summaryText); document.getElementById("copyNote").textContent="copied! 💌"; }
+  catch(_){ document.getElementById("copyNote").textContent=summaryText; }
+});
+</script>
+</body>
+</html>
