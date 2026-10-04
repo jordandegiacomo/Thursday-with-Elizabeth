@@ -198,6 +198,19 @@
     border:3px solid #eee0c9; border-radius:16px; background:#fff; color:var(--ink); outline:none; }
   .field input:focus{ border-color:var(--pink); }
 
+  .question-field{ text-align:left; margin:20px 0; }
+  .question-field label{ display:block; font-weight:600; font-size:17px; }
+  .question-field p{ color:#7e6b53; font-size:14px; margin:5px 0 9px; line-height:1.4; }
+  .question-field textarea{ display:block; width:100%; min-height:84px; resize:vertical;
+    font-family:'Fredoka',system-ui,sans-serif; font-size:16px; line-height:1.5;
+    padding:12px 14px; color:var(--ink); background:#fffdf7; border:2px solid #eee0c9;
+    border-radius:16px; user-select:text; -webkit-user-select:text; }
+  .question-field textarea:focus{ outline:2px solid var(--pink); outline-offset:2px; }
+  .question-field textarea::placeholder{ color:#958573; }
+  .answer-summary{ text-align:left; margin:16px 0; padding:14px 16px; background:#fff8e9;
+    border-radius:16px; font-size:16px; line-height:1.5; }
+  .answer-summary p{ margin:6px 0 0; white-space:pre-wrap; overflow-wrap:anywhere; }
+
   .next{ margin-top:18px; background:linear-gradient(135deg,var(--purple),var(--pink-deep)); color:#fff; box-shadow:0 12px 26px rgba(153,98,39,.4); }
   .next:disabled{ opacity:.45; cursor:not-allowed; filter:grayscale(.3); }
   a.btn{ text-decoration:none; display:inline-block; }
@@ -276,14 +289,28 @@
   </div>
 </section>
 
-<!-- ===================== SCREEN 2: PICK ACTIVITY ===================== -->
+<!-- ===================== SCREEN 2: A FEW QUESTIONS ===================== -->
 <section class="screen" id="screen2">
   <div class="card">
-    <div class="badge">🎉</div>
-    <h1>An orchard date it is!</h1>
-    <p class="sub">Apple picking is the plan. What should we add? (pick a few)</p>
-    <div class="grid" id="optGrid"></div>
-    <button class="btn next" id="next2" disabled>Next 💫</button>
+    <div class="badge">📝</div>
+    <h1>Your apple-picking application</h1>
+    <p class="sub">A few very serious questions. All optional, obviously 🍎</p>
+    <div class="question-field">
+      <label for="carDJ">Car DJ requests 🎶</label>
+      <p id="carDJHint">What songs or artists should we listen to on the way?</p>
+      <textarea id="carDJ" rows="2" maxlength="500" aria-describedby="carDJHint" placeholder="Your road-trip soundtrack…"></textarea>
+    </div>
+    <div class="question-field">
+      <label for="experience">Applicable experience 🍏</label>
+      <p id="experienceHint">Any apple picking, donut tasting, or passenger princess experience?</p>
+      <textarea id="experience" rows="2" maxlength="500" aria-describedby="experienceHint" placeholder="Tell me your qualifications…"></textarea>
+    </div>
+    <div class="question-field">
+      <label for="funFact">Fun fact / special request 💬</label>
+      <p id="funFactHint">Something I should know about you, or a little request for our date?</p>
+      <textarea id="funFact" rows="2" maxlength="500" aria-describedby="funFactHint" placeholder="I’m listening…"></textarea>
+    </div>
+    <button class="btn next" id="next2">Submit my qualifications 🍂</button>
   </div>
 </section>
 
@@ -321,14 +348,6 @@ const CONFIG = {
   herName: "Elizabeth",   // → "Will you go apple picking with me, Elizabeth?"
   yourName: "Jordan",   // → "Text Jordan the details"
   textTo: "+14014868323",   // "Text me the details" opens her Messages app to this number, pre-filled with the plan
-
-  // Activity / food choices on screen 2. {emoji, label}
-  activities: [
-    { em:"🍩", lb:"Cider donuts" }, { em:"☕", lb:"Warm cider" },
-    { em:"🚜", lb:"Hayride" }, { em:"📸", lb:"Cute photos" },
-    { em:"🎃", lb:"Pumpkin patch" }, { em:"🍽️", lb:"Food after" },
-    { em:"🍎", lb:"Just the apples" },
-  ],
 
   // The No button's TEXT changes to the next line each time she tries to click it.
   // (It starts as "No"; first dodge → first line below, and so on. It loops.)
@@ -523,16 +542,15 @@ yesBtn.addEventListener("click", ()=>{
   setTimeout(()=>go("screen2"),650);
 });
 
-/* ---------------- SCREEN 2: activities ---------------- */
-const grid=document.getElementById("optGrid"); const chosen=new Set();
-CONFIG.activities.forEach(a=>{
-  const d=document.createElement("div"); d.className="opt"; d.innerHTML=`<span class="em">${a.em}</span><span class="lb">${a.lb}</span>`;
-  d.addEventListener("click",()=>{ vibrate(15); d.classList.toggle("sel");
-    d.classList.contains("sel")?chosen.add(a.lb):chosen.delete(a.lb);
-    document.getElementById("next2").disabled = chosen.size===0; });
-  grid.appendChild(d);
+/* ---------------- SCREEN 2: optional questions ---------------- */
+const questions=[
+  {id:"carDJ",label:"Car DJ requests 🎶"},
+  {id:"experience",label:"Applicable experience 🍏"},
+  {id:"funFact",label:"Fun fact / special request 💬"},
+];
+document.getElementById("next2").addEventListener("click",()=>{
+  document.activeElement?.blur(); vibrate(25); confetti(12); go("screen3");
 });
-document.getElementById("next2").addEventListener("click",()=>{ vibrate(25); confetti(24); go("screen3"); });
 
 /* ---------------- SCREEN 3: pickup ---------------- */
 document.getElementById("next3").addEventListener("click",()=>{ vibrate([20,40,20,40,160]); confetti(90); buildSummary(); go("screen4"); });
@@ -540,10 +558,19 @@ document.getElementById("next3").addEventListener("click",()=>{ vibrate([20,40,2
 /* ---------------- SCREEN 4: summary ---------------- */
 let summaryText="";
 function buildSummary(){
-  const acts=["Apple picking", ...chosen].join(" + "), date="Thursday", time="12:30 PM";
+  const acts="Apple picking", date="Thursday", time="12:30 PM";
   document.getElementById("summaryBox").innerHTML=
     `<div class="summary-line">🍎 <b>${acts}</b></div><div class="summary-line">🗓️ <b>${date}</b></div><div class="summary-line">🚗 Pickup: <b>${time}</b></div>`;
   summaryText=`It’s an apple-picking date! 💘\nWhat: ${acts}\nPickup: ${date} at ${time}`;
+  questions.forEach(({id,label})=>{
+    const answer=document.getElementById(id).value.trim();
+    if(!answer) return;
+    const block=document.createElement("div"); block.className="answer-summary";
+    const heading=document.createElement("strong"); heading.textContent=label;
+    const text=document.createElement("p"); text.textContent=answer;
+    block.append(heading,text); document.getElementById("summaryBox").appendChild(block);
+    summaryText+=`\n\n${label}:\n${answer}`;
+  });
   // pre-fill an SMS to your number with the plan; she just taps send
   document.getElementById("textBtn").setAttribute("href", `sms:${CONFIG.textTo}?&body=${encodeURIComponent(summaryText)}`);
 }
